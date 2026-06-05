@@ -5489,6 +5489,14 @@ export class Parser {
             trailingComma = false;
             const arg = this._parseArgument();
 
+            // ! Cython - consume C++ name alias string after enum field name
+            if (
+                arg.valueExpression.nodeType === ParseNodeType.Name &&
+                this._peekTokenType() === TokenType.String
+            ) {
+                this._getNextToken();
+            }
+
             // We'll store each argument as an assignment
             let assign: AssignmentNode;
             if (arg.valueExpression.nodeType === ParseNodeType.Name) {
@@ -5504,7 +5512,8 @@ export class Parser {
             } else {
                 // Shouldn't get here
                 this._addError(Localizer.Diagnostic.expectedAssignRightHandExpr(), this._peekToken());
-                continue;
+                this._consumeTokensUntilType([TokenType.NewLine]);
+                break;
             }
 
             if (arg.argumentCategory !== ArgumentCategory.Simple) {
