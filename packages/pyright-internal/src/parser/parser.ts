@@ -7052,7 +7052,7 @@ export class Parser {
             node.blockTrail = trailBlock;
             extendRange(node, trailBlock);
         }
-        this._expectNewLine();
+        //this._expectNewLine();
         return node;
     }
 
