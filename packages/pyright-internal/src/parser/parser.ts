@@ -5549,10 +5549,10 @@ export class Parser {
         // TODO: `class` cpdef not allowed when language is not C++
         const classToken = this._peekToken();
         let isClass = this._consumeTokenIfKeyword(KeywordType.Class);
-        if (!cpdef && isClass) {
-            this._addError(Localizer.Diagnostic.expectedIdentifier(), classToken);
-            isClass = false;
-        }
+        //if (!cpdef && isClass) {
+        //    this._addError(Localizer.Diagnostic.expectedIdentifier(), classToken);
+        //    isClass = false;
+        //}
 
         // enum can be anonymous
         const nameIden = this._getTokenIfIdentifier();
