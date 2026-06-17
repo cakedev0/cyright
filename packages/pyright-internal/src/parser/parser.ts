@@ -5558,6 +5558,8 @@ export class Parser {
         const nameIden = this._getTokenIfIdentifier();
         const name = nameIden ? NameNode.create(nameIden) : undefined;
 
+        this._getTokenIfType(TokenType.String);
+
         if (isClass && this._consumeTokenIfType(TokenType.OpenParenthesis)) {
             // Type expected
             if (this._peekTokenType() === TokenType.CloseParenthesis) {
@@ -7644,6 +7646,8 @@ export class Parser {
             this._addError(Localizer.Diagnostic.expectedClassName(), this._peekToken());
             nameToken = IdentifierToken.create(0, 0, '', /* comments */ undefined);
         }
+
+        this._getTokenIfType(TokenType.String);
 
         let typeParameters: TypeParameterListNode | undefined;
         const possibleOpenBracket = this._peekToken();
