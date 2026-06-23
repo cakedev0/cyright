@@ -7234,7 +7234,7 @@ export class Parser {
                             // Don't allow same modifier twice
                             break;
                         }
-                        if (nextKeyword !== KeywordType.Const) {
+                        if (nextKeyword !== KeywordType.Const && nextKeyword !== KeywordType.Api) {
                             // `const` should be last modifier
                             break;
                         }
