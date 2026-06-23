@@ -271,6 +271,7 @@ export namespace TypeBase {
             isConst: node ? CTypeNode.isConstant(node) : false,
             isVolatile: node ? CTypeNode.isVolatile(node) : false,
             isPublic: node ? CTypeNode.isPublic(node) : false,
+            isApi: node ? CTypeNode.isApi(node) : false,
             isReadOnly: node ? CTypeNode.isReadOnly(node) : false,
             numMods: node ? CTypeNode.numModifiers(node) : [],
             trailType: node ? CTypeNode.trailType(node) : CTrailType.None,
@@ -553,6 +554,7 @@ export interface CythonDetails {
     isVolatile?: boolean;
     isReadOnly?: boolean;
     isPublic?: boolean;
+    isApi?: boolean;
     numMods?: string[]; // Numeric modifiers
     trailType?: CTrailType;
 
