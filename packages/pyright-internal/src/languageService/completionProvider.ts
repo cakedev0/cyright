@@ -163,6 +163,7 @@ namespace Keywords {
         'inline',
         'const',
         'readonly',
+        'api',
         'public',
         'signed',
         'unsigned',
