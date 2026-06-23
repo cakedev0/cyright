@@ -2548,6 +2548,10 @@ export namespace CTypeNode {
         return hasModifier(node, KeywordType.Public);
     }
 
+    export function isApi(node: CTypeNode) {
+        return hasModifier(node, KeywordType.Api);
+    }
+
     export function isReadOnly(node: CTypeNode) {
         return hasModifier(node, KeywordType.Readonly);
     }
