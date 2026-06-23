@@ -24579,6 +24579,7 @@ export function createTypeEvaluator(importLookup: ImportLookup, evaluatorOptions
             // TODO: might need to be used
             isConst: false,
             isPublic: false,
+            isApi: false,
             isReadOnly: false,
 
             cpdef: false,
