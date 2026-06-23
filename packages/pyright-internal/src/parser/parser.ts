@@ -5783,12 +5783,37 @@ export class Parser {
                 break;
             }
             case TokenType.Keyword: {
-                if (varModifiers.includes(kwToken.keywordType) || numericModifiers.includes(kwToken.keywordType)) {
-                    // Var modifier (var declaration)
-                    node = this._parseCVarDecl();
-                    if (CFunctionNode.isInstance(node)) {
-                        return node;
-                    }
+                 if (varModifiers.includes(kwToken.keywordType) || numericModifiers.includes(kwToken.keywordType)) {
+                     const nextKw = this._peekToken(1);
+                     if (nextKw.type === TokenType.Keyword) {
+                         const nextKwType = (nextKw as KeywordToken).keywordType;
+                         if (
+                             nextKwType === KeywordType.Enum ||
+                             nextKwType === KeywordType.Struct ||
+                             nextKwType === KeywordType.Union ||
+                             nextKwType === KeywordType.Fused ||
+                             nextKwType === KeywordType.Cppclass
+                         ) {
+                             this._getNextToken(); // consume the modifier
+                             while (true) {
+                                const kw = this._peekKeywordType();
+                                if (kw === undefined || !varModifiers.includes(kw)) break;
+                                this._getNextToken();
+                            }
+                             switch (this._peekKeywordType()) {
+                                 case KeywordType.Enum: return this._parseEnum(false);
+                                 case KeywordType.Struct:
+                                 case KeywordType.Union:
+                                 case KeywordType.Fused: return this._parseCStruct();
+                                 case KeywordType.Cppclass: return this._parseCppClassDef();
+                             }
+                         }
+                     }
+                     // Var modifier (var declaration)
+                     node = this._parseCVarDecl();
+                     if (CFunctionNode.isInstance(node)) {
+                         return node;
+                     }
                 } else {
                     switch (kwToken.keywordType) {
                         case KeywordType.Nogil: {
