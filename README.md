@@ -1,4 +1,9 @@
 # Cyright
+
+> ⚠️ Note: This is a temporary maintenance fork of **[Cyright](https://github.com/ktnrg45/cyright)**.  
+> The original repository is archived. All credit goes to the original author.  
+> This fork exists only to apply fixes and keep the project usable.
+
 # Static type checker for Cython
 This is the static type checker/language server for the VS Code [Cython extension](https://github.com/ktnrg45/vs-code-cython).
 <br><br><br>
