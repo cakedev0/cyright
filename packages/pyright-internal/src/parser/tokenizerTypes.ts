@@ -171,6 +171,7 @@ export const enum KeywordType {
     Long,
     Noexcept,
     Packed, // Only used for struct
+    Api,
     Volatile,
     Enum,
     Struct,
@@ -196,6 +197,7 @@ export const varModifiers = [
     KeywordType.Inline,
     KeywordType.Public,
     KeywordType.Volatile,
+    KeywordType.Api,
 ];
 
 // ! Cython
@@ -223,6 +225,7 @@ export const softKeywords = [
     KeywordType.Noexcept,
     KeywordType.Packed,
     KeywordType.Volatile,
+    KeywordType.Api,
     KeywordType.Enum,
     KeywordType.Struct,
     KeywordType.Union,
