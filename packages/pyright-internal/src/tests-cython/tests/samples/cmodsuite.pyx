@@ -3,6 +3,8 @@ cdef class Foo:
     cdef public:
         int a
         double b
+        rng
+        other_obj = None
 
     cdef readonly:
         int c

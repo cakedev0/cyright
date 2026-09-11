@@ -6093,6 +6093,53 @@ export class Parser {
             }
         }
 
+        // Bare-name declaration with no explicit type, e.g. inside `cdef public:`:
+        //     rng
+        //     rng = None
+        // Cython allows the type to be omitted for a cdef-class attribute (it's
+        // then dynamically typed, equivalent to `cdef public object rng`).
+        // Without this check, `_parseCType()` below greedily consumes the
+        // identifier as a type name, finds nothing left for the variable name,
+        // and reports a spurious "Expected identifier".
+        if (this._peekTokenType() === TokenType.Identifier) {
+            const afterName = this._peekToken(1);
+            const isAssign =
+                afterName.type === TokenType.Operator &&
+                (afterName as OperatorToken).operatorType === OperatorType.Assign;
+            const isTerminator = [TokenType.NewLine, TokenType.Semicolon, TokenType.EndOfStream].includes(
+                afterName.type
+            );
+            if (isAssign || isTerminator) {
+                const nameToken = this._getNextToken() as IdentifierToken;
+                const nameNode = NameNode.create(nameToken);
+                const objectType = CTypeNode.create(
+                    NameNode.create(IdentifierToken.create(0, 0, 'object', undefined)),
+                    [],
+                    [],
+                    []
+                );
+                nameNode.typeNode = objectType;
+                const typeAnnotation = TypeAnnotationNode.create(nameNode, objectType);
+                let declNode: ParseNode = typeAnnotation;
+                if (this._consumeTokenIfOperator(OperatorType.Assign)) {
+                    const exprListResult = this._parseExpressionListGeneric(
+                        () => this._parseTestOrStarExpression(/*allowAssignmentExpression*/ false),
+                        () => this._isNextTokenNeverExpression(),
+                        () => true
+                    );
+                    if (!exprListResult.parseError) {
+                        const rightExpr = this._makeExpressionOrTuple(exprListResult, /*enclosedInParens*/ false);
+                        declNode = AssignmentNode.create(typeAnnotation, rightExpr);
+                    }
+                }
+                const statements = StatementListNode.create(nameToken);
+                this._pushStatements(statements, declNode);
+                this._expectNewLine();
+                this._consumeTokenIfType(TokenType.NewLine);
+                return statements;
+            }
+        }
+
         const typeNode = this._parseCType();
         const nodes: ParseNode[] = [];
         let hasPointers = false;
