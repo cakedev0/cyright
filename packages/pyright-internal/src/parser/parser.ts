@@ -5863,7 +5863,15 @@ export class Parser {
         }
         const statements = StatementListNode.create(cdefToken);
         this._pushStatements(statements, node);
-        if (node.nodeType !== ParseNodeType.Suite) {
+        // A grouped modifier block (`cdef public:` etc, from _parseCVarDecl) comes
+        // back as a StatementList wrapping a single Suite, same as a bare Suite
+        // would: it already consumed its own trailing newline/dedent, so skip
+        // the single-line `_expectNewLine()` check for it too.
+        const isWrappedSuite =
+            node.nodeType === ParseNodeType.StatementList &&
+            node.statements.length === 1 &&
+            node.statements[0].nodeType === ParseNodeType.Suite;
+        if (node.nodeType !== ParseNodeType.Suite && !isWrappedSuite) {
             this._expectNewLine();
         }
         this._consumeTokenIfType(TokenType.NewLine);
@@ -6054,6 +6062,35 @@ export class Parser {
                     }
                 }
                 break;
+        }
+
+        // Grouped declarations under one or more access modifiers, e.g.:
+        //   cdef public:
+        //       int a
+        //       double b
+        // Cython allows `public`/`readonly`/etc. to be followed directly by a
+        // suite instead of a type, applying the modifier to every declaration
+        // in the block. Without this check, `_parseCType()` below treats the
+        // modifier as the start of a type, hits the unexpected `:`, and the
+        // resulting error desyncs indentation for the entire block.
+        const groupKwType = this._peekKeywordType();
+        if (groupKwType !== undefined && varModifiers.includes(groupKwType)) {
+            const modifierTokens: KeywordToken[] = [];
+            let peekIndex = 0;
+            let nextKwType: KeywordType | undefined = groupKwType;
+            while (nextKwType !== undefined && varModifiers.includes(nextKwType)) {
+                modifierTokens.push(this._peekToken(peekIndex) as KeywordToken);
+                peekIndex++;
+                const next = this._peekToken(peekIndex);
+                nextKwType = next.type === TokenType.Keyword ? (next as KeywordToken).keywordType : undefined;
+            }
+            if (this._peekToken(peekIndex).type === TokenType.Colon) {
+                modifierTokens.forEach(() => this._getNextToken());
+                const suite = this._parseCDefSuite(modifierTokens[0], /*nogil*/ false);
+                const statements = StatementListNode.create(modifierTokens[0]);
+                this._pushStatements(statements, suite);
+                return statements;
+            }
         }
 
         const typeNode = this._parseCType();
